@@ -14,8 +14,14 @@ public enum UPCarouselFlowLayoutSpacingMode {
     case overlap(visibleOffset: CGFloat)
 }
 
+public protocol UPCarouselFlowLayoutDelegate: class
+{
+    func willSnapToIndexPath(_ layout: UPCarouselFlowLayout, indexPath: IndexPath)
+}
 
 open class UPCarouselFlowLayout: UICollectionViewFlowLayout {
+    
+    open var delegate: UPCarouselFlowLayoutDelegate?
     
     fileprivate struct LayoutState {
         var size: CGSize
@@ -126,10 +132,16 @@ open class UPCarouselFlowLayout: UICollectionViewFlowLayout {
         var targetContentOffset: CGPoint
         if isHorizontal {
             let closest = layoutAttributes.sorted { abs($0.center.x - proposedContentOffsetCenterOrigin) < abs($1.center.x - proposedContentOffsetCenterOrigin) }.first ?? UICollectionViewLayoutAttributes()
+            
+            delegate?.willSnapToIndexPath(self, indexPath: closest.indexPath)
+            
             targetContentOffset = CGPoint(x: floor(closest.center.x - midSide), y: proposedContentOffset.y)
         }
         else {
             let closest = layoutAttributes.sorted { abs($0.center.y - proposedContentOffsetCenterOrigin) < abs($1.center.y - proposedContentOffsetCenterOrigin) }.first ?? UICollectionViewLayoutAttributes()
+            
+            delegate?.willSnapToIndexPath(self, indexPath: closest.indexPath)
+            
             targetContentOffset = CGPoint(x: proposedContentOffset.x, y: floor(closest.center.y - midSide))
         }
         
